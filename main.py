@@ -4,6 +4,7 @@
 # Nov6 Cog in place 9:07am
 # Beginning of main.py nov7
 # RRL Memory module done
+# Quality Applied Nov12
 
 ````python
 import asyncio
@@ -63,39 +64,27 @@ async def main():
         # Start monitoring loop in background
         monitoring_task = asyncio.create_task(run_monitoring(internal_monitor, process_manager, kb))
 
-        # Perform parallel Bayesian optimization
-        best_params, best_score = await parallel_bayesian_optimization(
-            initial_param_space, X_train, y_train, X_test, y_test, 
-            n_iterations=5, complexity_factor=complexity_factor
-        )
+# Quality start here *****
 
-        # Train final model with best parameters
-        if best_params is not None:
-            final_model = YourModelClass().set_params(**best_params)
-            final_model.fit(X_train, y_train)
-            final_performance = evaluate_performance(final_model, X_test, y_test)
-# cog start
-meta_cognitive_manager.update_self_model(
-            'model_training',
-            {
-                'mse': final_performance,
-                'complexity_factor': complexity_factor,
-                'optimization_score': best_score
-            }
-        )
-        
-        component_state = meta_cognitive_manager.get_component_state('model_training')
-        if component_state and component_state['confidence'] < 0.7:
-            logging.warning("Low confidence in model performance, "
-                          "considering retraining with different parameters")
+  # Perform parallel Bayesian optimization with dynamic complexity
+    best_params, best_score, best_quality_score = await parallel_bayesian_optimization(
+        initial_param_space, X_train, y_train, X_test, y_test,
+        n_iterations=5, complexity_factor=complexity_factor
+    )
 
-# cog area end
+    # Train final model with best parameters
+    if best_params is not None:
+        final_model = YourModelClass().set_params(**best_params)
+        assimilation_module.assimilate(final_model, X_train, y_train, complexity_factor, best_quality_score)
+        final_performance = evaluate_performance(final_model, X_test, y_test)
+        logging.info(f"Final model MSE on test set: {final_performance}")
 
-            logging.info(f"Final model MSE on test set: {final_performance}")
+        # Store the final model, complexity factor, and performance in the knowledge base
+        kb.update("final_model", final_model, complexity_factor, best_quality_score)
+        kb.update("final_performance", final_performance, complexity_factor, best_quality_score)
 
-            # Store in knowledge base
-            kb.update("final_model", final_model, complexity_factor)
-            kb.update("final_performance", final_performance, complexity_factor)
+# Quality end here *********
+
         else:
             logging.error("Optimization failed to produce valid results.")
 
