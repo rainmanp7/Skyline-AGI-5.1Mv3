@@ -1,6 +1,8 @@
 # 9 Base tier implemented Nov9
 # Beginning of complexity.py
 # Nov9 RRL Memory Module 
+# Quality change applied nov12
+
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.neural_network import MLPRegressor
@@ -17,13 +19,15 @@ class EnhancedModelSelector:
         self.knowledge_base = knowledge_base
         self.assimilation_module = assimilation_module
 
-@dataclass
+# Quality change begin
 class ModelConfig:
     model_class: Any
     default_params: Dict[str, Any]
     complexity_level: str
     suggested_iterations: int
     suggested_metric: Callable
+    quality_score: float  # New attribute to store the quality score
+# Quality change end.
 
 class EnhancedModelSelector(ModelSelector):
     def __init__(self):
