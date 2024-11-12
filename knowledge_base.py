@@ -2,6 +2,7 @@
 # Beginning of knowledge_base.py
 # Nov6 Cog update implemented
 # RRL Nov10 update applied
+# Quality choice applied nov12
 
 from collections import deque
 from threading import Lock
@@ -31,8 +32,14 @@ class TieredKnowledgeBase:
         self.lock = Lock()
         self.knowledge_base_monitor = InternalProcessMonitor()
 
-    def update(self, key: str, value: Any, complexity: int) -> bool:
+# here quality begin
+
+    def update(self, key: str, value: Any, complexity: int, quality_score: float) -> bool:
+
         tier = self._get_tier(complexity)
+
+# here quality end
+
         if tier is None:
             return False
         with self.lock:
@@ -89,7 +96,10 @@ class TieredKnowledgeBase:
                 return tier
         return None
 
-    def update(self, key: str, value: Any, complexity: int) -> bool:
+# quality 2nd part start
+    def update(self, key: str, value: Any, complexity: int, quality_score: float) -> bool:
+# quality 2nd part end
+
         """
         Update the knowledge base with new information based on complexity.
         
@@ -117,9 +127,13 @@ class TieredKnowledgeBase:
                     self.knowledge_bases[tier][key] = value
             else:
                 self.knowledge_bases[tier][key] = value if not isinstance(value, list) else list(set(value))
-            
-            self.recent_updates.append((tier, key, value, complexity))
-            return True
+      
+# quality score start     
+      
+ self.recent_updates.append((tier, key, value, complexity, quality_score))
+        return True
+
+# quality score end
 
     def query(self, key: str, complexity_range: Tuple[int, int] = None) -> Dict[str, Any]:
         """
