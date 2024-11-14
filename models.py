@@ -1,7 +1,7 @@
 # 9 tier reworked
 # removed the simple medium complex
 # models.py
-# memory added.
+# memory added fitted Nov14
 ````python
 
 from dataclasses import dataclass
@@ -15,6 +15,7 @@ from collections import defaultdict
 import torch.nn as nn
 from memory_manager import MemoryManager
 from attention_mechanism import MultiHeadAttention, ContextAwareAttention
+
 
 class SkylineModel(nn.Module):
     def __init__(self, input_size, num_heads, context_size):
