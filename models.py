@@ -1,6 +1,7 @@
 # 9 tier reworked
 # removed the simple medium complex
 # models.py
+# memory added.
 ````python
 
 from dataclasses import dataclass
@@ -11,6 +12,28 @@ import time
 import memory_profiler
 import logging
 from collections import defaultdict
+import torch.nn as nn
+from memory_manager import MemoryManager
+from attention_mechanism import MultiHeadAttention, ContextAwareAttention
+
+class SkylineModel(nn.Module):
+    def __init__(self, input_size, num_heads, context_size):
+        super(SkylineModel, self).__init__()
+        self.multi_head_attention = MultiHeadAttention(input_size=input_size, num_heads=num_heads)
+        self.context_aware_attention = ContextAwareAttention(input_size=input_size, context_size=context_size)
+        # Add other layers, such as feedforward, residual connections, etc.
+
+    def forward(self, x, context):
+        # Apply multi-head attention
+        x = self.multi_head_attention(x)
+
+        # Apply context-aware attention
+        x = self.context_aware_attention(x, context)
+
+        # Apply other layers
+        # ...
+
+        return x
 
 class BaseModel:
     def __init__(self):  # Fixed double underscores
