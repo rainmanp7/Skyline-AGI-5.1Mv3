@@ -17,9 +17,17 @@ from internal_process_monitor import InternalProcessMonitor
 from metacognitive_manager import MetaCognitiveManager
 from memory_manager import MemoryManager
 from attention_mechanism import MultiHeadAttention, ContextAwareAttention
+from assimilation_memory_module import AssimilationMemoryModule
 
-# Memory Manager Short, current, long
-memory_manager = MemoryManager()
+# Create the MemoryManager instance
+   memory_manager = MemoryManager()
+
+   # Create the AssimilationMemoryModule instance and pass the MemoryManager
+   assimilation_memory_module = AssimilationMemoryModule(knowledge_base, memory_manager)
+
+   # Create the MetacognitiveManager instance and pass the MemoryManager
+   metacognitive_manager = MetacognitiveManager(knowledge_base, skyline_model, memory_manager)
+
 
 #Beginning of changes to integrate AssimilationMemoryModule
 async def main():
