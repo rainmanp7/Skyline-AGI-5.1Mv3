@@ -5,6 +5,7 @@
 # Beginning of main.py nov7
 # RRL Memory module done
 # Quality Applied Nov12
+# Memory tie togeather xL Nov14
 
 ````python
 import asyncio
@@ -28,6 +29,11 @@ from assimilation_memory_module import AssimilationMemoryModule
    # Create the MetacognitiveManager instance and pass the MemoryManager
    metacognitive_manager = MetacognitiveManager(knowledge_base, skyline_model, memory_manager)
 
+# Forward pass
+   output = skyline_model(input_data, context_data)
+
+   # Pass the output to the Metacognitive Manager for further processing
+   metacognitive_manager.process_output(output)
 
 #Beginning of changes to integrate AssimilationMemoryModule
 async def main():
