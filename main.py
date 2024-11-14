@@ -15,6 +15,11 @@ from optimization import adjust_search_space, parallel_bayesian_optimization
 from knowledge_base import TieredKnowledgeBase
 from internal_process_monitor import InternalProcessMonitor
 from metacognitive_manager import MetaCognitiveManager
+from memory_manager import MemoryManager
+from attention_mechanism import MultiHeadAttention, ContextAwareAttention
+
+# Memory Manager Short, current, long
+memory_manager = MemoryManager()
 
 #Beginning of changes to integrate AssimilationMemoryModule
 async def main():
