@@ -6,6 +6,7 @@
 # RRL Memory module done
 # Quality Applied Nov12
 # Memory tie togeather xL Nov14
+# modifying Nov16
 
 ````python
 import asyncio
@@ -19,6 +20,45 @@ from metacognitive_manager import MetaCognitiveManager
 from memory_manager import MemoryManager
 from attention_mechanism import MultiHeadAttention, ContextAwareAttention
 from assimilation_memory_module import AssimilationMemoryModule
+from uncertainty_quantification import UncertaintyQuantification
+
+class SkylineAGI:
+    def __init__(self):
+        #... other initializations
+        self.uncertainty_quantification = UncertaintyQuantification()
+
+def process_data(self data):
+        # Generate ensemble predictions
+        ensemble_predictions = self.generate_ensemble_predictions(data)
+        true_labels = self.get_true_labels(data)
+
+        # Estimate uncertainties
+        epistemic_uncertainty = self.uncertainty_quantification.estimate_uncertainty(
+            np.mean(ensemble_predictions axis=0) 
+            ensemble_predictions
+        )
+
+        aleatoric_uncertainty = self.uncertainty_quantification.handle_aleatoric(
+            np.var(ensemble_predictions)
+        )
+
+        # Calibrate confidence
+        confidence = self.uncertainty_quantification.calibrate_confidence(
+            np.mean(ensemble_predictions axis=0) 
+            true_labels
+        )
+
+        # Make decision with uncertainty
+        decision = self.uncertainty_quantification.make_decision_with_uncertainty(
+            np.mean(ensemble_predictions axis=0)
+        )
+
+        return {
+            "epistemic_uncertainty": epistemic_uncertainty
+            "aleatoric_uncertainty": aleatoric_uncertainty
+            "confidence": confidence
+            "decision": decision
+        }
 
 # Create the MemoryManager instance
    memory_manager = MemoryManager()
