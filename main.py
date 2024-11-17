@@ -7,6 +7,7 @@
 # Quality Applied Nov12
 # Memory tie togeather xL Nov14
 # modifying Nov16 setting Nov17
+# Nov18 review and implement.
 
 ````python
 import asyncio
@@ -137,7 +138,7 @@ async def main():
 
     # Train final model with best parameters
     if best_params is not None:
-        final_model = YourModelClass().set_params(**best_params)
+final_model = SkylineAGIModel(config).set_params(**best_params)
         assimilation_module.assimilate(final_model, X_train, y_train, complexity_factor, best_quality_score)
         final_performance = evaluate_performance(final_model, X_test, y_test)
         logging.info(f"Final model MSE on test set: {final_performance}")
