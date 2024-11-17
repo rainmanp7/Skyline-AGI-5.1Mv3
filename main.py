@@ -6,7 +6,7 @@
 # RRL Memory module done
 # Quality Applied Nov12
 # Memory tie togeather xL Nov14
-# modifying Nov16
+# modifying Nov16 setting Nov17
 
 ````python
 import asyncio
@@ -21,6 +21,10 @@ from memory_manager import MemoryManager
 from attention_mechanism import MultiHeadAttention, ContextAwareAttention
 from assimilation_memory_module import AssimilationMemoryModule
 from uncertainty_quantification import UncertaintyQuantification
+import json
+
+     with open("config.json", "r") as config_file:
+         config = json.load(config_file)
 
 class SkylineAGI:
     def __init__(self):
