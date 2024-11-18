@@ -7,7 +7,7 @@
 # Quality Applied Nov12
 # Memory tie togeather xL Nov14
 # modifying Nov16 setting Nov17
-# Nov18 review and implement.
+# Nov18 review and implemented train_data done.
 
 ````python
 import asyncio
@@ -100,7 +100,7 @@ async def main():
         internal_monitor.start_task_monitoring("model_training")
         
         # Determine the complexity factor
-        complexity_factor = get_complexity_factor(X_train, y_train)
+        complexity_factor = get_complexity_factor(train_data.X, train_data.y)
 
         # Create tasks
         tasks = [
@@ -108,7 +108,7 @@ async def main():
                 name="model_training",
                 priority=1,
                 function=model.fit,
-                args=(X_train, y_train),
+                args=(train_data.X, train_data.y),
                 kwargs={}
             ),
             ProcessTask(
@@ -132,15 +132,15 @@ async def main():
 
   # Perform parallel Bayesian optimization with dynamic complexity
     best_params, best_score, best_quality_score = await parallel_bayesian_optimization(
-        initial_param_space, X_train, y_train, X_test, y_test,
+        initial_param_space, train_data.X, train_data.y, test_data.X, test_data.Y,
         n_iterations=5, complexity_factor=complexity_factor
     )
 
     # Train final model with best parameters
     if best_params is not None:
 final_model = SkylineAGIModel(config).set_params(**best_params)
-        assimilation_module.assimilate(final_model, X_train, y_train, complexity_factor, best_quality_score)
-        final_performance = evaluate_performance(final_model, X_test, y_test)
+        assimilation_module.assimilate(final_model, train_data.X, train_data.y, complexity_factor, best_quality_score)
+        final_performance = evaluate_performance(final_model, test_data.X, test_data.Y)
         logging.info(f"Final model MSE on test set: {final_performance}")
 
         # Store the final model, complexity factor, and performance in the knowledge base
