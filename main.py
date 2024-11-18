@@ -8,6 +8,7 @@
 # Memory tie togeather xL Nov14
 # modifying Nov16 setting Nov17
 # Nov18 review and implemented train_data done.
+# Nov18 fixed imports
 
 ````python
 import asyncio
@@ -23,47 +24,62 @@ from attention_mechanism import MultiHeadAttention, ContextAwareAttention
 from assimilation_memory_module import AssimilationMemoryModule
 from uncertainty_quantification import UncertaintyQuantification
 import json
+from async_process_manager import AsyncProcessManager
+from models import ProcessTask, model_validator, SkylineAGIModel
+from optimization import optimizer
+from models import evaluate_performance
+
 
      with open("config.json", "r") as config_file:
-         config = json.load(config_file)
+    config = json.load(config_file)
+
+#intialize items
+knowledge_base = TieredKnowledgeBase()
+skyline_model = SkylineAGI()  
+# Assuming this is your main model
+input_data, context_data = get_input_data()  
+# Replace with actual data-loading function
+
 
 class SkylineAGI:
     def __init__(self):
         #... other initializations
         self.uncertainty_quantification = UncertaintyQuantification()
 
-def process_data(self data):
-        # Generate ensemble predictions
-        ensemble_predictions = self.generate_ensemble_predictions(data)
-        true_labels = self.get_true_labels(data)
+def process_data(self, data):
+    # Generate ensemble predictions
+    ensemble_predictions = self.generate_ensemble_predictions(data)
+    true_labels = self.get_true_labels(data)
 
-        # Estimate uncertainties
-        epistemic_uncertainty = self.uncertainty_quantification.estimate_uncertainty(
-            np.mean(ensemble_predictions axis=0) 
-            ensemble_predictions
-        )
+    # Estimate uncertainties
+    epistemic_uncertainty = self.uncertainty_quantification.estimate_uncertainty(
+        np.mean(ensemble_predictions, axis=0),
+        ensemble_predictions
+    )
 
-        aleatoric_uncertainty = self.uncertainty_quantification.handle_aleatoric(
-            np.var(ensemble_predictions)
-        )
+    aleatoric_uncertainty = self.uncertainty_quantification.handle_aleatoric(
+        np.var(ensemble_predictions)
+    )
 
-        # Calibrate confidence
-        confidence = self.uncertainty_quantification.calibrate_confidence(
-            np.mean(ensemble_predictions axis=0) 
-            true_labels
-        )
+    # Calibrate confidence
+    confidence = self.uncertainty_quantification.calibrate_confidence(
+        np.mean(ensemble_predictions, axis=0),
+        true_labels
+    )
 
-        # Make decision with uncertainty
-        decision = self.uncertainty_quantification.make_decision_with_uncertainty(
-            np.mean(ensemble_predictions axis=0)
-        )
+    # Make decision with uncertainty
+    decision = self.uncertainty_quantification.make_decision_with_uncertainty(
+        np.mean(ensemble_predictions, axis=0)
+    )
 
-        return {
-            "epistemic_uncertainty": epistemic_uncertainty
-            "aleatoric_uncertainty": aleatoric_uncertainty
-            "confidence": confidence
-            "decision": decision
-        }
+    return {
+        "epistemic_uncertainty": epistemic_uncertainty,
+        "aleatoric_uncertainty": aleatoric_uncertainty,
+        "confidence": confidence,
+        "decision": decision
+    }
+
+
 
 # Create the MemoryManager instance
    memory_manager = MemoryManager()
@@ -132,16 +148,15 @@ async def main():
 
   # Perform parallel Bayesian optimization with dynamic complexity
     best_params, best_score, best_quality_score = await parallel_bayesian_optimization(
-        initial_param_space, train_data.X, train_data.y, test_data.X, test_data.Y,
+        initial_param_space, train_data.X, train_data.y, test_data.X, test_data.y,
         n_iterations=5, complexity_factor=complexity_factor
     )
 
     # Train final model with best parameters
     if best_params is not None:
-final_model = SkylineAGIModel(config).set_params(**best_params)
-        assimilation_module.assimilate(final_model, train_data.X, train_data.y, complexity_factor, best_quality_score)
-        final_performance = evaluate_performance(final_model, test_data.X, test_data.Y)
-        logging.info(f"Final model MSE on test set: {final_performance}")
+    final_model = SkylineAGIModel(config).set_params(**best_params)
+    assimilation_module.assimilate(final_model, train_data.X, train_data.y, complexity_factor, best_quality_score)
+    final_performance = evaluate_performance(final_model, test_data.X, test_data.y)
 
         # Store the final model, complexity factor, and performance in the knowledge base
         kb.update("final_model", final_model, complexity_factor, best_quality_score)
