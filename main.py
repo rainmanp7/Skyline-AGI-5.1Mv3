@@ -99,11 +99,11 @@ def process_data(self, data):
 #Beginning of changes to integrate AssimilationMemoryModule
 async def main():
     process_manager = AsyncProcessManager()
-    kb = TieredKnowledgeBase()
-    model_selector = EnhancedModelSelector(kb, AssimilationMemoryModule(kb))
+    knowledge_base = TieredKnowledgeBase()
+    model_selector = EnhancedModelSelector(knowledge_base, AssimilationMemoryModule(knowledge_base))
     assimilation_module = model_selector.assimilation_module
     internal_monitor = InternalProcessMonitor()
-    metacognitive_manager = MetaCognitiveManager(process_manager, kb, model_selector)
+    metacognitive_manager = MetaCognitiveManager(process_manager, knowledge_base, model_selector)
 
     # Run the metacognitive tasks in a separate thread
     asyncio.create_task(metacognitive_manager.run_metacognitive_tasks())
@@ -142,7 +142,7 @@ async def main():
             internal_monitor.monitor_task_queue_length(process_manager.task_queue.qsize())
 
         # Start monitoring loop in background
-        monitoring_task = asyncio.create_task(run_monitoring(internal_monitor, process_manager, kb))
+        monitoring_task = asyncio.create_task(run_monitoring(internal_monitor, process_manager, knowledge_base))
 
 # Quality start here *****
 
@@ -159,8 +159,8 @@ async def main():
     final_performance = evaluate_performance(final_model, test_data.X, test_data.y)
 
         # Store the final model, complexity factor, and performance in the knowledge base
-        kb.update("final_model", final_model, complexity_factor, best_quality_score)
-        kb.update("final_performance", final_performance, complexity_factor, best_quality_score)
+        knowledge_base.update("final_model", final_model, complexity_factor, best_quality_score)
+        knowledge_base.update("final_performance", final_performance, complexity_factor, best_quality_score)
 
 # Quality end here *********
 
@@ -180,7 +180,7 @@ async def main():
         await process_manager.cleanup()
         monitoring_task.cancel()  # Stop monitoring loop
 
-async def run_monitoring(internal_monitor, process_manager, kb):
+async def run_monitoring(internal_monitor, process_manager, knowledge_base):
     """Background monitoring loop"""
     try:
         last_update_count = 0
@@ -194,7 +194,7 @@ async def run_monitoring(internal_monitor, process_manager, kb):
                 internal_monitor.monitor_task_queue_length(process_manager.task_queue.qsize())
             
             # Monitor knowledge base updates
-            current_update_count = len(kb.get_recent_updates())
+            current_update_count = len(knowledge_base.get_recent_updates())
             internal_monitor.monitor_knowledge_base_updates(current_update_count - last_update_count)
             last_update_count = current_update_count
 
