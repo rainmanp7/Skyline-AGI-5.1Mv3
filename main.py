@@ -29,15 +29,20 @@ from async_process_manager import AsyncProcessManager
 from models import ProcessTask, model_validator, SkylineAGIModel
 from optimization import optimizer
 from models import evaluate_performance
+from cross_domain_evaluation import CrossDomainEvaluation
+
 
 # Load config file
 with open("config.json", "r") as config_file:
     config = json.load(config_file)
 
 # Initialize components
+cross_domain_evaluation = CrossDomainEvaluation()
 knowledge_base = TieredKnowledgeBase()
-skyline_model = SkylineAGIModel(config)  # Assuming this is your main model
-input_data, context_data = get_input_data()  # Replace with actual data-loading function
+skyline_model = SkylineAGIModel(config)  
+# Assuming this is your main model
+input_data, context_data = get_input_data()  
+# Replace with actual data-loading function
 
 # Add the SkylineAGI class if needed
 class SkylineAGI:
@@ -129,17 +134,34 @@ async def main():
         )
 
         # Train the final model and assimilate knowledge
-        if best_params:
-            final_model = SkylineAGIModel(config).set_params(**best_params)
-            assimilation_module.assimilate(final_model, train_data.X, train_data.y, complexity_factor, best_quality_score)
-            final_performance = evaluate_performance(final_model, test_data.X, test_data.y)
+# START Final Model ##############
 
-            # Update knowledge base with final model and performance metrics
-            knowledge_base.update("final_model", final_model, complexity_factor, best_quality_score)
-            knowledge_base.update("final_performance", final_performance, complexity_factor, best_quality_score)
+        # Train the final model and assimilate knowledge
+if best_params:
+    final_model = SkylineAGIModel(config).set_params(**best_params)
+    assimilation_module.assimilate(final_model, train_data.X, train_data.y, complexity_factor, best_quality_score)
+    final_performance = evaluate_performance(final_model, test_data.X, test_data.y)
 
-        else:
-            logging.error("Optimization failed to produce valid results.")
+    # Update knowledge base with final model and performance metrics
+    knowledge_base.update("final_model", final_model, complexity_factor, best_quality_score)
+    knowledge_base.update("final_performance", final_performance, complexity_factor, best_quality_score)
+
+    # Cross-Domain Evaluation (after final model training)
+    logging.info("Starting cross-domain evaluation...")
+    cross_domain_evaluation.monitor_generalization_capabilities(final_model, knowledge_base)
+    
+    # Update knowledge base with evaluation insights
+    if hasattr(cross_domain_evaluation, "results"):
+        knowledge_base.update_from_evaluation(cross_domain_evaluation.results)
+        logging.info("Knowledge base updated with cross-domain evaluation insights.")
+    else:
+        logging.warning("No evaluation results found to update knowledge base.")
+
+else:
+    logging.error("Optimization failed to produce valid results.")
+
+#ends with logging after training.
+####################
 
         # End model training monitoring and generate task report
         internal_monitor.end_task_monitoring()
@@ -213,8 +235,6 @@ class CrossDomainGeneralization:
             overall_performance += domain_performance
         return overall_performance / len(domains)
 
-# Initialize Cross-Domain Generalization
-cross_domain_generalization = CrossDomainGeneralization(knowledge_base, final_model)
 
 
 
