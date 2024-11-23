@@ -1,3 +1,5 @@
+
+```python
 # Cross Domain Generalization.
 # Cross domain communication.
 
@@ -5,8 +7,9 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-from keras.models import load_model  # Assuming Keras is used for deep learning models
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from keras.models import load_model, Model
+from keras.layers import Dense
 from keras.applications import VGG16  # Example of a pre-trained model for image data
 
 class CrossDomainGeneralization:
@@ -28,10 +31,17 @@ class CrossDomainGeneralization:
                 
             elif domain == 'images':
                 # Load image data (assumed to be in a directory)
-                # Placeholder for actual image loading logic
-                images = []  # Load images into this list
+                images = []  # Load images into this list (implement image loading logic)
                 labels = []  # Corresponding labels for images
                 X_train, X_val, y_train, y_val = train_test_split(images, labels, test_size=0.2, random_state=42)
+
+            elif domain == 'audio':
+                # Load audio data (placeholder for actual audio loading logic)
+                pass  # Implement audio loading and preprocessing logic
+
+            elif domain == 'time_series':
+                # Load time series data (placeholder for actual time series loading logic)
+                pass  # Implement time series loading and preprocessing logic
 
             else:
                 # Load numerical data (assumed to be in CSV format)
@@ -58,12 +68,19 @@ class CrossDomainGeneralization:
             print(f"No knowledge found for source domain '{source_domain}'.")
             return
 
-        # Example of using a pre-trained model for transfer learning (for image domains)
         if target_domain == 'images':
             base_model = VGG16(weights='imagenet', include_top=False)  # Load a pre-trained model
-            self.model.set_weights(base_model.get_weights())  # Transfer weights from pre-trained model
+            
+            # Fine-tune specific layers of the pre-trained model
+            for layer in base_model.layers[:-4]:  # Freeze all layers except the last 4
+                layer.trainable = False
+            
+            x = base_model.output
+            x = Dense(256, activation='relu')(x)  # Add a new fully connected layer
+            predictions = Dense(1, activation='sigmoid')(x)  # Assuming binary classification
+            
+            self.model = Model(inputs=base_model.input, outputs=predictions)  # Create new model
 
-        # Here you can implement more complex transfer techniques based on your needs.
         print(f"Knowledge transferred from {source_domain} to {target_domain}.")
 
     def fine_tune_model(self, domain):
@@ -91,9 +108,20 @@ class CrossDomainGeneralization:
             if X_train is not None:
                 self.model.fit(X_train, y_train)
                 predictions = self.model.predict(X_val)
+
                 accuracy = accuracy_score(y_val, predictions)
-                results[domain] = accuracy
+                precision = precision_score(y_val, predictions)
+                recall = recall_score(y_val, predictions)
+                f1 = f1_score(y_val, predictions)
+
+                results[domain] = {
+                    'accuracy': accuracy,
+                    'precision': precision,
+                    'recall': recall,
+                    'f1_score': f1,
+                }
         
         return results
 
 # End of cross_domain_generalization.py
+```
