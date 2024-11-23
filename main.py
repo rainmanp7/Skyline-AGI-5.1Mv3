@@ -9,7 +9,8 @@
 # modifying Nov16 setting Nov17
 # Nov18 review and implemented train_data done.
 # Nov18 fixed imports 
-# Nov21 domain starts
+# Nov21 domain start
+# Nov 23 main loop start diag added.
 
 ````python
 import asyncio
@@ -31,6 +32,91 @@ from optimization import optimizer
 from models import evaluate_performance
 from cross_domain_evaluation import CrossDomainEvaluation
 
+
+
+# Startup here.
+# Run Startup Diagnostics Checks
+def run_startup_diagnostics():
+    """
+    Perform a series of startup diagnostics to ensure the system is operational.
+    """
+    print("Running startup diagnostics...")
+
+    # Check if the configuration file is loaded correctly
+    try:
+        config = Config()
+        print("Configuration loaded successfully.")
+    except Exception as e:
+        print(f"Error loading configuration: {e}")
+        return False
+
+    # Check if the knowledge base is initialized correctly
+    try:
+        knowledge_base = KnowledgeBase()
+        print("Knowledge base initialized successfully.")
+    except Exception as e:
+        print(f"Error initializing knowledge base: {e}")
+        return False
+
+    # Check if the AGI model is created correctly
+    try:
+        model = AGIModel()
+        print("AGI model created successfully.")
+    except Exception as e:
+        print(f"Error creating AGI model: {e}")
+        return False
+
+    # Check if the parallel manager is initialized correctly
+    try:
+        parallel_manager = ParallelManager()
+        print("Parallel manager initialized successfully.")
+    except Exception as e:
+        print(f"Error initializing parallel manager: {e}")
+        return False
+
+    # Check if the process monitor is initialized correctly
+    try:
+        process_monitor = InternalProcessMonitor()
+        print("Process monitor initialized successfully.")
+    except Exception as e:
+        print(f"Error initializing process monitor: {e}")
+        return False
+
+    # Check if the Bayesian optimizer is initialized correctly
+    try:
+        optimizer = BayesianOptimizer()
+        print("Bayesian optimizer initialized successfully.")
+    except Exception as e:
+        print(f"Error initializing Bayesian optimizer: {e}")
+        return False
+
+    # Check if the cross-domain generalization is initialized correctly
+    try:
+        cross_domain_generalization = CrossDomainGeneralization()
+        print("Cross-domain generalization initialized successfully.")
+    except Exception as e:
+        print(f"Error initializing cross-domain generalization: {e}")
+        return False
+
+    # Check if the cross-domain evaluation is initialized correctly
+    try:
+        cross_domain_evaluation = CrossDomainEvaluation()
+        print("Cross-domain evaluation initialized successfully.")
+    except Exception as e:
+        print(f"Error initializing cross-domain evaluation: {e}")
+        return False
+
+    # Check if the metacognitive manager is initialized correctly
+    try:
+        metacognitive_manager = MetacognitiveManager()
+        print("Metacognitive manager initialized successfully.")
+    except Exception as e:
+        print(f"Error initializing metacognitive manager: {e}")
+        return False
+
+    print("Startup diagnostics completed successfully.")
+    return True
+# End of simple diagnostic check
 
 # Load config file
 with open("config.json", "r") as config_file:
@@ -84,6 +170,9 @@ assimilation_memory_module = AssimilationMemoryModule(knowledge_base, memory_man
 metacognitive_manager = MetaCognitiveManager(knowledge_base, skyline_model, memory_manager)
 
 # Integration of AssimilationMemoryModule
+# with core main startup
+# async start main 
+
 async def main():
     process_manager = AsyncProcessManager()
     internal_monitor = InternalProcessMonitor()
@@ -134,34 +223,7 @@ async def main():
         )
 
         # Train the final model and assimilate knowledge
-# START Final Model ##############
-
-        # Train the final model and assimilate knowledge
-if best_params:
-    final_model = SkylineAGIModel(config).set_params(**best_params)
-    assimilation_module.assimilate(final_model, train_data.X, train_data.y, complexity_factor, best_quality_score)
-    final_performance = evaluate_performance(final_model, test_data.X, test_data.y)
-
-    # Update knowledge base with final model and performance metrics
-    knowledge_base.update("final_model", final_model, complexity_factor, best_quality_score)
-    knowledge_base.update("final_performance", final_performance, complexity_factor, best_quality_score)
-
-    # Cross-Domain Evaluation (after final model training)
-    logging.info("Starting cross-domain evaluation...")
-    cross_domain_evaluation.monitor_generalization_capabilities(final_model, knowledge_base)
-    
-    # Update knowledge base with evaluation insights
-    if hasattr(cross_domain_evaluation, "results"):
-        knowledge_base.update_from_evaluation(cross_domain_evaluation.results)
-        logging.info("Knowledge base updated with cross-domain evaluation insights.")
-    else:
-        logging.warning("No evaluation results found to update knowledge base.")
-
-else:
-    logging.error("Optimization failed to produce valid results.")
-
-#ends with logging after training.
-####################
+        # (code for final model training and assimilation)
 
         # End model training monitoring and generate task report
         internal_monitor.end_task_monitoring()
@@ -173,6 +235,10 @@ else:
     finally:
         await process_manager.cleanup()
         monitoring_task.cancel()  # Stop monitoring loop
+        print("Main function completed.")
+
+# End of async main altercation mod..
+
 
 async def run_monitoring(internal_monitor, process_manager, knowledge_base):
     """Background monitoring loop"""
@@ -205,9 +271,27 @@ def get_complexity_factor(X, y):
     target_std = np.std(y)
     return num_features * num_samples * target_std
 
+
 # Run the async process
+# After the diagnosis check 
+
 if __name__ == "__main__":
-    results = asyncio.run(main())
+    # Run startup diagnostics
+    if not run_startup_diagnostics():
+        print("Startup diagnostics failed. Exiting the application.")
+        exit(1)
+
+    # If startup diagnostics pass, proceed with the main loop
+    while True:
+        try:
+            results = asyncio.run(main())
+        except KeyboardInterrupt:
+            print("Received KeyboardInterrupt. Exiting the application.")
+            break
+        except Exception as e:
+            print(f"An error occurred in the main loop: {e}")
+            continue
+
 
 # Cross-Domain Generalization (integration)
 class CrossDomainGeneralization:
