@@ -55,9 +55,11 @@
       "optimization",
       "knowledge_base"
     ]
-  }
+  },
+  "random_seed": 42,
+  "model_save_dir": "./models",
+  "num_parallel_jobs": 4
 }
-
 
 # End of config.json
 `````
