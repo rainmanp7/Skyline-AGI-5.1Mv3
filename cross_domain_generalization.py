@@ -6,6 +6,8 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from keras.models import load_model  # Assuming Keras is used for deep learning models
+from keras.applications import VGG16  # Example of a pre-trained model for image data
 
 class CrossDomainGeneralization:
     def __init__(self, knowledge_base, model):
@@ -14,18 +16,33 @@ class CrossDomainGeneralization:
 
     def load_and_preprocess_data(self, domain):
         """Load and preprocess data from the given domain."""
-        # Load data (Assuming data is in CSV format for simplicity)
         try:
-            data = pd.read_csv(f"{domain}_data.csv")  # Replace with actual data source
-            features = data.drop('target', axis=1)  # Assuming 'target' is the label column
-            labels = data['target']
+            if domain == 'text':
+                # Load text data (assumed to be in CSV format)
+                data = pd.read_csv('text_data.csv')
+                features = data['text']  # Assuming 'text' is the column with textual data
+                labels = data['target']
+                # Perform text preprocessing (tokenization, padding, etc.)
+                # Placeholder for actual text processing logic
+                X_train, X_val, y_train, y_val = train_test_split(features, labels, test_size=0.2, random_state=42)
+                
+            elif domain == 'images':
+                # Load image data (assumed to be in a directory)
+                # Placeholder for actual image loading logic
+                images = []  # Load images into this list
+                labels = []  # Corresponding labels for images
+                X_train, X_val, y_train, y_val = train_test_split(images, labels, test_size=0.2, random_state=42)
 
-            # Preprocessing: Standardize features
-            scaler = StandardScaler()
-            features_scaled = scaler.fit_transform(features)
+            else:
+                # Load numerical data (assumed to be in CSV format)
+                data = pd.read_csv(f"{domain}_data.csv")
+                features = data.drop('target', axis=1)
+                labels = data['target']
+                
+                scaler = StandardScaler()
+                features_scaled = scaler.fit_transform(features)
 
-            # Split into training and validation sets
-            X_train, X_val, y_train, y_val = train_test_split(features_scaled, labels, test_size=0.2, random_state=42)
+                X_train, X_val, y_train, y_val = train_test_split(features_scaled, labels, test_size=0.2, random_state=42)
 
             return X_train, y_train, X_val, y_val
 
@@ -35,18 +52,19 @@ class CrossDomainGeneralization:
 
     def transfer_knowledge(self, source_domain, target_domain):
         """Transfer knowledge from the source domain to the target domain."""
-        # Retrieve knowledge from source domain's knowledge base
         source_knowledge = self.knowledge_base.query(source_domain)
 
         if not source_knowledge:
             print(f"No knowledge found for source domain '{source_domain}'.")
             return
 
-        # Here we can implement various strategies for transferring knowledge.
-        # For simplicity, let's assume we're transferring model parameters or weights.
-        for key, value in source_knowledge.items():
-            print(f"Transferring knowledge: {key} -> {value}")
-            self.model.set_params(**value)  # Assuming value contains hyperparameters or weights
+        # Example of using a pre-trained model for transfer learning (for image domains)
+        if target_domain == 'images':
+            base_model = VGG16(weights='imagenet', include_top=False)  # Load a pre-trained model
+            self.model.set_weights(base_model.get_weights())  # Transfer weights from pre-trained model
+
+        # Here you can implement more complex transfer techniques based on your needs.
+        print(f"Knowledge transferred from {source_domain} to {target_domain}.")
 
     def fine_tune_model(self, domain):
         """Fine-tune the model for the given domain."""
@@ -56,10 +74,8 @@ class CrossDomainGeneralization:
             print("Training data could not be loaded. Fine-tuning aborted.")
             return
 
-        # Fine-tuning: Fit the model on the new domain's training data
-        self.model.fit(X_train, y_train)
+        self.model.fit(X_train, y_train)  # Fit the model on new training data
 
-        # Validate the model on validation data
         predictions = self.model.predict(X_val)
         accuracy = accuracy_score(y_val, predictions)
         
