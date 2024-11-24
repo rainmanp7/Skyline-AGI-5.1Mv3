@@ -1,5 +1,3 @@
-
-```python
 # Cross Domain Generalization.
 # Cross domain communication.
 
@@ -9,8 +7,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from keras.models import load_model, Model
-from keras.layers import Dense
+from keras.layers import Dense, Flatten
 from keras.applications import VGG16  # Example of a pre-trained model for image data
+from keras.preprocessing.image import ImageDataGenerator
+import librosa  # For audio processing
 
 class CrossDomainGeneralization:
     def __init__(self, knowledge_base, model):
@@ -21,30 +21,38 @@ class CrossDomainGeneralization:
         """Load and preprocess data from the given domain."""
         try:
             if domain == 'text':
-                # Load text data (assumed to be in CSV format)
                 data = pd.read_csv('text_data.csv')
                 features = data['text']  # Assuming 'text' is the column with textual data
                 labels = data['target']
-                # Perform text preprocessing (tokenization, padding, etc.)
-                # Placeholder for actual text processing logic
+                # Placeholder for actual text processing logic (tokenization, etc.)
+                # For example using TF-IDF or similar techniques
                 X_train, X_val, y_train, y_val = train_test_split(features, labels, test_size=0.2, random_state=42)
-                
+
             elif domain == 'images':
                 # Load image data (assumed to be in a directory)
-                images = []  # Load images into this list (implement image loading logic)
-                labels = []  # Corresponding labels for images
-                X_train, X_val, y_train, y_val = train_test_split(images, labels, test_size=0.2, random_state=42)
+                datagen = ImageDataGenerator(rescale=1./255)
+                train_generator = datagen.flow_from_directory('image_data/train', target_size=(224, 224), batch_size=32)
+                validation_generator = datagen.flow_from_directory('image_data/val', target_size=(224, 224), batch_size=32)
+
+                return train_generator, validation_generator
 
             elif domain == 'audio':
                 # Load audio data (placeholder for actual audio loading logic)
-                pass  # Implement audio loading and preprocessing logic
+                audio_data = []  # List to hold audio features
+                labels = []  # Corresponding labels for audio files
+                # Example: load an audio file using librosa
+                y, sr = librosa.load('audio_file.wav')
+                mfccs = librosa.feature.mfcc(y=y, sr=sr)
+                audio_data.append(mfccs)
+                labels.append(1)  # Placeholder label
+
+                return np.array(audio_data), np.array(labels)
 
             elif domain == 'time_series':
                 # Load time series data (placeholder for actual time series loading logic)
                 pass  # Implement time series loading and preprocessing logic
 
             else:
-                # Load numerical data (assumed to be in CSV format)
                 data = pd.read_csv(f"{domain}_data.csv")
                 features = data.drop('target', axis=1)
                 labels = data['target']
@@ -75,13 +83,12 @@ class CrossDomainGeneralization:
             for layer in base_model.layers[:-4]:  # Freeze all layers except the last 4
                 layer.trainable = False
             
-            x = base_model.output
+            x = Flatten()(base_model.output)
             x = Dense(256, activation='relu')(x)  # Add a new fully connected layer
             predictions = Dense(1, activation='sigmoid')(x)  # Assuming binary classification
             
             self.model = Model(inputs=base_model.input, outputs=predictions)  # Create new model
-
-        print(f"Knowledge transferred from {source_domain} to {target_domain}.")
+            print("Knowledge transferred from {} to {}.".format(source_domain, target_domain))
 
     def fine_tune_model(self, domain):
         """Fine-tune the model for the given domain."""
@@ -94,7 +101,9 @@ class CrossDomainGeneralization:
         self.model.fit(X_train, y_train)  # Fit the model on new training data
 
         predictions = self.model.predict(X_val)
-        accuracy = accuracy_score(y_val, predictions)
+        predictions_classes = (predictions > 0.5).astype(int)  # Convert probabilities to binary classes
+        
+        accuracy = accuracy_score(y_val, predictions_classes)
         
         print(f"Model fine-tuned on '{domain}' with accuracy: {accuracy:.2f}")
 
@@ -108,11 +117,13 @@ class CrossDomainGeneralization:
             if X_train is not None:
                 self.model.fit(X_train, y_train)
                 predictions = self.model.predict(X_val)
+                
+                predictions_classes = (predictions > 0.5).astype(int)
 
-                accuracy = accuracy_score(y_val, predictions)
-                precision = precision_score(y_val, predictions)
-                recall = recall_score(y_val, predictions)
-                f1 = f1_score(y_val, predictions)
+                accuracy = accuracy_score(y_val, predictions_classes)
+                precision = precision_score(y_val, predictions_classes)
+                recall = recall_score(y_val, predictions_classes)
+                f1 = f1_score(y_val, predictions_classes)
 
                 results[domain] = {
                     'accuracy': accuracy,
@@ -124,4 +135,3 @@ class CrossDomainGeneralization:
         return results
 
 # End of cross_domain_generalization.py
-```
